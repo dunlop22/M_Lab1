@@ -65,6 +65,28 @@ int ReadFile(double Matrix[][4], double MatrixB[][4])
     return 1;
 }   
 
+void PrintMatrix(int num, double Matrix[][4])
+{
+    if (num < 3)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            cout << Matrix[num][j] << "\n";
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                cout << Matrix[i][j] << " ";
+            }
+            cout << "\n";
+        }
+    }
+}
+
 
 int main()
 {
@@ -81,4 +103,7 @@ int main()
     double MatrixB[3][4];
 
     ReadFile(MatrixOrig, MatrixB);
+    PrintMatrix(3, MatrixOrig);
+
+
 }
