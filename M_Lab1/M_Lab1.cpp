@@ -87,6 +87,43 @@ void PrintMatrix(int num, double Matrix[][4])
     }
 }
 
+void Y(double MatrixLU[][4], double MatrixB[][4])
+{
+    for (int i = 0; i < 4; i++)
+    {
+        double temp = 0;
+
+        for (int j = 0; j < i; j++)
+        {
+            temp = temp + MatrixB[0][j] * MatrixLU[i][j];
+        }
+        MatrixB[0][i] = MatrixB[0][i] - temp;
+    }
+}
+
+
+void X(double MatrixOrig[][4], double MatrixB[][4])
+{
+    double result[4];
+
+    for (int i = 4 - 1; i >= 0; i--)
+    {
+        double temp = 0;
+
+        for (int j = i + 1; j < 4; j++)
+        {
+            temp = temp + MatrixOrig[i][j] * result[j];
+        }
+
+        result[i] = (MatrixB[0][i] - temp) / MatrixOrig[i][i];
+    }
+    
+    for (int i = 0; i < 4; i++)
+    {
+        cout << result[i];
+    }
+}
+
 
 void func(double MatrixLU[][4])
 {
@@ -127,6 +164,7 @@ void func(double MatrixLU[][4])
     }
 }
 
+
 int main()
 {
     setlocale(LC_ALL, "Russian");
@@ -146,5 +184,10 @@ int main()
 
     func(MatrixOrig);
     PrintMatrix(3, MatrixOrig);
+
+    Y(MatrixOrig, MatrixB);
+    PrintMatrix(0, MatrixB);
+
+    X(MatrixOrig, MatrixB);
 
 }
