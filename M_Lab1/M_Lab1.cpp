@@ -87,7 +87,7 @@ void PrintMatrix(int num, double Matrix[][4])
     }
 }
 
-void Y(double MatrixLU[][4], double MatrixB[][4])
+void Y(double MatrixLU[][4], double MatrixB[][4], int k)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -95,14 +95,14 @@ void Y(double MatrixLU[][4], double MatrixB[][4])
 
         for (int j = 0; j < i; j++)
         {
-            temp = temp + MatrixB[0][j] * MatrixLU[i][j];
+            temp = temp + MatrixB[k][j] * MatrixLU[i][j];
         }
-        MatrixB[0][i] = MatrixB[0][i] - temp;
+        MatrixB[k][i] = MatrixB[k][i] - temp;
     }
 }
 
 
-void X(double MatrixOrig[][4], double MatrixB[][4])
+void X(double MatrixLU[][4], double MatrixB[][4], int k)
 {
     double result[4];
 
@@ -112,15 +112,54 @@ void X(double MatrixOrig[][4], double MatrixB[][4])
 
         for (int j = i + 1; j < 4; j++)
         {
-            temp = temp + MatrixOrig[i][j] * result[j];
+            temp = temp + MatrixLU[i][j] * result[j];
         }
 
-        result[i] = (MatrixB[0][i] - temp) / MatrixOrig[i][i];
+        result[i] = (MatrixB[k][i] - temp) / MatrixLU[i][i];
     }
     
     for (int i = 0; i < 4; i++)
     {
-        cout << result[i];
+        cout << result[i] << endl;
+    }
+}
+
+void ReverseSearch(double MatrixOrig[][4], double MatrixReverse[][4])
+{
+    for (int k = 3; k >= 0; k--)
+    {
+        double sum = 0;
+
+        for (int n = k + 1; n < 4; n++)
+        {
+            sum += MatrixOrig[k][n] * MatrixReverse[n][k];
+        }
+
+        MatrixReverse[k][k] = (1 - sum) / MatrixOrig[k][k];
+
+        for (int i = k - 1; i >= 0; i--)
+        {
+            sum = 0;
+
+            for (int n = i + 1; n < 4; n++)
+            {
+                sum += MatrixOrig[i][n] * MatrixReverse[n][k];
+            }
+
+            MatrixReverse[i][k] = (-1) * sum / MatrixOrig[i][i];
+        }
+
+        for (int j = k - 1; j >= 0; j--)
+        {
+            sum = 0;
+
+            for (int n = j + 1; n < 4; n++)
+            {
+                sum += MatrixReverse[k][n] * MatrixOrig[n][j];
+            }
+
+            MatrixReverse[k][j] = (-1) * sum;
+        }
     }
 }
 
@@ -176,18 +215,50 @@ int main()
         return 0;
     }
 
-    double MatrixOrig[4][4];
+    double Matrix[4][4], MatrixReverse[4][4];
     double MatrixB[3][4];
 
-    ReadFile(MatrixOrig, MatrixB);
-    PrintMatrix(3, MatrixOrig);
+    ReadFile(Matrix, MatrixB);
 
-    func(MatrixOrig);
-    PrintMatrix(3, MatrixOrig);
+    cout << "Матрица A" << endl;
+    PrintMatrix(3, Matrix);
 
-    Y(MatrixOrig, MatrixB);
-    PrintMatrix(0, MatrixB);
+    cout << endl << "Матрица L - E + U" << endl;
 
-    X(MatrixOrig, MatrixB);
+    func(Matrix);
+    PrintMatrix(3, Matrix);
+
+    double det = 1;
+
+    for (int k = 0; k < 4; k++)
+    {
+        det = det * Matrix[k][k];
+    }
+
+    cout << endl << "Определитель |A| = " << det << endl;
+
+    cout << endl << "Обратная матрица" << endl;
+    ReverseSearch(Matrix, MatrixReverse);
+    PrintMatrix(3, MatrixReverse);
+
+    for (int k = 0; k < 3; k++)
+    {
+        cout << endl << "Тест №" << k + 1 << endl;
+
+        cout << endl << "Вектор B" << endl;
+        PrintMatrix(k, MatrixB);
+
+        cout << endl << "Вектор Y" << endl;
+
+        Y(Matrix, MatrixB, k);
+        PrintMatrix(k, MatrixB);
+
+        cout << endl << "Вектор X" << endl;
+
+        X(Matrix, MatrixB, k);
+
+        cout << endl;
+    }
+    
 
 }
