@@ -229,6 +229,27 @@ void DecompLU(double Matrix[][4], double MatrixLU[][4])
     }
 }
 
+double countNorm(double Matrix[][4])
+{
+    double norm = 0;
+
+    for (int i = 0; i < 4; i++)
+    {
+        double sum = 0;
+
+        for (int j = 0; j < 4; j++)
+        {
+            sum += abs(Matrix[i][j]);
+        }
+
+        if (sum > norm)
+        {
+            norm = sum;
+        }
+    }
+
+    return norm;
+}
 
 int main()
 {
@@ -268,6 +289,10 @@ int main()
     ReverseSearch(MatrixLU, MatrixReverse);
     PrintMatrix(3, MatrixReverse);
 
+    double cond = countNorm(Matrix) * countNorm(MatrixReverse);
+
+    cout << endl << "Число обусловленности M = " << cond << endl;
+
     for (int k = 0; k < 3; k++)
     {
         cout << endl << "Тест №" << k + 1 << endl;
@@ -276,18 +301,16 @@ int main()
         PrintMatrix(k, MatrixB);
 
         cout << endl << "Вектор Y" << endl;
-
         Y(MatrixLU, MatrixB, k, VectorY);
         PrintVector(VectorY);
 
         cout << endl << "Вектор X" << endl;
-
         X(MatrixLU, VectorY, VectorX);
         PrintVector(VectorX);
 
         cout << endl << "Невязки" << endl;
-
         Residuals(Matrix, MatrixB, VectorX, k);
+
         cout << endl;
     }
 }
