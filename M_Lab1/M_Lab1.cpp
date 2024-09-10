@@ -88,6 +88,45 @@ void PrintMatrix(int num, double Matrix[][4])
 }
 
 
+void func(double MatrixLU[][4])
+{
+    for (int i = 0; i < 4;)
+    {
+        if (MatrixLU[i][i] == 0)
+        {
+            cout << "LU разложение невозможно";
+            return;
+        }
+
+
+        //L
+        for (int j = i + 1; j < 4; j++)
+        {
+            double temp = 0;
+
+            for (int m = 0; m < i; m++)
+            {
+                temp = temp + MatrixLU[j][m] * MatrixLU[m][i];
+            }
+
+            MatrixLU[j][i] = (MatrixLU[j][i] - temp) / MatrixLU[i][i];
+        }
+        i++;
+        //U
+        for (int j = i; j < 4; j++)
+        {
+            double temp = 0;
+
+            for (int m = 0; m < i; m++)
+            {
+                temp = temp + MatrixLU[i][m] * MatrixLU[m][j];
+            }
+
+            MatrixLU[i][j] = MatrixLU[i][j] - temp;
+        }
+    }
+}
+
 int main()
 {
     setlocale(LC_ALL, "Russian");
@@ -105,5 +144,7 @@ int main()
     ReadFile(MatrixOrig, MatrixB);
     PrintMatrix(3, MatrixOrig);
 
+    func(MatrixOrig);
+    PrintMatrix(3, MatrixOrig);
 
 }
