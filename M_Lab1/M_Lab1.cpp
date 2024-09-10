@@ -87,7 +87,17 @@ void PrintMatrix(int num, double Matrix[][4])
     }
 }
 
-void Y(double MatrixLU[][4], double MatrixB[][4], int k)
+void PrintVector(double Vector[4])
+{
+    for (int i = 0; i < 4; i++)
+    {
+        cout << Vector[i] << endl;
+    }
+}
+
+
+
+void Y(double MatrixLU[][4], double MatrixB[][4], int k, double vectorY[4])
 {
     for (int i = 0; i < 4; i++)
     {
@@ -95,33 +105,44 @@ void Y(double MatrixLU[][4], double MatrixB[][4], int k)
 
         for (int j = 0; j < i; j++)
         {
-            temp = temp + MatrixB[k][j] * MatrixLU[i][j];
+            temp = temp + vectorY[j] * MatrixLU[i][j];
         }
-        MatrixB[k][i] = MatrixB[k][i] - temp;
+
+        vectorY[i] = MatrixB[k][i] - temp;
     }
 }
 
 
-void X(double MatrixLU[][4], double MatrixB[][4], int k)
+void X(double MatrixLU[][4], double VectorY[4], double VectorX[4])
 {
-    double result[4];
-
     for (int i = 4 - 1; i >= 0; i--)
     {
         double temp = 0;
 
         for (int j = i + 1; j < 4; j++)
         {
-            temp = temp + MatrixLU[i][j] * result[j];
+            temp = temp + MatrixLU[i][j] * VectorX[j];
         }
 
-        result[i] = (MatrixB[k][i] - temp) / MatrixLU[i][i];
+        VectorX[i] = (VectorY[i] - temp) / MatrixLU[i][i];
     }
-    
+}
+
+void Residuals(double Matrix[][4], double MatrixB[][4], double vectorX[4], int k)
+{
+    double res[4];
+
     for (int i = 0; i < 4; i++)
     {
-        cout << result[i] << endl;
+        res[i] = MatrixB[k][i];
+
+        for (int j = 0; j < 4; j++)
+        {
+            res[i] -= Matrix[i][j] * vectorX[j];
+        }
     }
+
+    PrintVector(res);
 }
 
 void ReverseSearch(double MatrixOrig[][4], double MatrixReverse[][4])
@@ -164,8 +185,13 @@ void ReverseSearch(double MatrixOrig[][4], double MatrixReverse[][4])
 }
 
 
-void func(double MatrixLU[][4])
+void DecompLU(double Matrix[][4], double MatrixLU[][4])
 {
+    for (int i = 0; i < 4; i++)
+    {
+        MatrixLU[0][i] = Matrix[0][i];
+    }
+
     for (int i = 0; i < 4;)
     {
         if (MatrixLU[i][i] == 0)
@@ -185,7 +211,7 @@ void func(double MatrixLU[][4])
                 temp = temp + MatrixLU[j][m] * MatrixLU[m][i];
             }
 
-            MatrixLU[j][i] = (MatrixLU[j][i] - temp) / MatrixLU[i][i];
+            MatrixLU[j][i] = (Matrix[j][i] - temp) / MatrixLU[i][i];
         }
         i++;
         //U
@@ -198,7 +224,7 @@ void func(double MatrixLU[][4])
                 temp = temp + MatrixLU[i][m] * MatrixLU[m][j];
             }
 
-            MatrixLU[i][j] = MatrixLU[i][j] - temp;
+            MatrixLU[i][j] = Matrix[i][j] - temp;
         }
     }
 }
@@ -215,8 +241,9 @@ int main()
         return 0;
     }
 
-    double Matrix[4][4], MatrixReverse[4][4];
+    double Matrix[4][4], MatrixLU[4][4], MatrixReverse[4][4];
     double MatrixB[3][4];
+    double VectorX[4], VectorY[4];
 
     ReadFile(Matrix, MatrixB);
 
@@ -225,20 +252,20 @@ int main()
 
     cout << endl << "Матрица L - E + U" << endl;
 
-    func(Matrix);
-    PrintMatrix(3, Matrix);
+    DecompLU(Matrix, MatrixLU);
+    PrintMatrix(3, MatrixLU);
 
     double det = 1;
 
     for (int k = 0; k < 4; k++)
     {
-        det = det * Matrix[k][k];
+        det = det * MatrixLU[k][k];
     }
 
     cout << endl << "Определитель |A| = " << det << endl;
 
     cout << endl << "Обратная матрица" << endl;
-    ReverseSearch(Matrix, MatrixReverse);
+    ReverseSearch(MatrixLU, MatrixReverse);
     PrintMatrix(3, MatrixReverse);
 
     for (int k = 0; k < 3; k++)
@@ -250,15 +277,17 @@ int main()
 
         cout << endl << "Вектор Y" << endl;
 
-        Y(Matrix, MatrixB, k);
-        PrintMatrix(k, MatrixB);
+        Y(MatrixLU, MatrixB, k, VectorY);
+        PrintVector(VectorY);
 
         cout << endl << "Вектор X" << endl;
 
-        X(Matrix, MatrixB, k);
+        X(MatrixLU, VectorY, VectorX);
+        PrintVector(VectorX);
 
+        cout << endl << "Невязки" << endl;
+
+        Residuals(Matrix, MatrixB, VectorX, k);
         cout << endl;
     }
-    
-
 }
